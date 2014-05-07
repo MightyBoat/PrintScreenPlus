@@ -17,21 +17,19 @@ namespace PrintScreenPlus
 {
     public class SysTrayApp : Form
     {
-       
-        
-        
-
-
-        private void CaptureMyScreen()
+        string SaveFolder;
+                           
+        public void CaptureMyScreen()
         {
 
             try
             {
-                DateTime theDate1 = DateTime.Now;
-
-                theDate1.ToString("D");
-
-                string targetPath = (@"C:\Users\Mike\Projects\Visual Studio projects\icon test\");
+                if (string.IsNullOrEmpty(SaveFolder)) 
+                {
+                    SaveFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                };
+                
+                string targetPath = string.Format("{0}{1}text-{2:yyyy-MM-dd_hh-mm-ss-tt}.png", SaveFolder, Path.DirectorySeparatorChar, DateTime.Now);
 
                 Bitmap captureBitmap = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
 
@@ -41,8 +39,6 @@ namespace PrintScreenPlus
                 captureGraphics.CopyFromScreen(0, 0, 0, 0, captureBitmap.Size);
 
                 captureBitmap.Save(targetPath);
-
-                MessageBox.Show("Screen Captured");
 
             }
 
@@ -54,33 +50,25 @@ namespace PrintScreenPlus
             }
 
         }
-        private void SaveLocation()
-        {
-            Stream myStream = null;
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-
-            saveFileDialog1.InitialDirectory = "c:\\";
-            saveFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            saveFileDialog1.FilterIndex = 2;
-            saveFileDialog1.RestoreDirectory = true;
-
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+        public string SaveLocation()
+        { 
+            
+            // This line calls the folder dialog
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            // This is what will execute if the user selects a folder and hits OK (File if you change to FileBrowserDialog)
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                try
-                {
-                    if ((myStream = saveFileDialog1.OpenFile()) != null)
-                    {
-                        using (myStream)
-                        {
-                            // Insert code to read the stream here.
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
-                }
+                SaveFolder = fbd.SelectedPath;
+                            
             }
+            else
+            {
+               // This prevents a crash when you close out of the window with nothing
+               SaveFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            }
+            
+            return SaveFolder;
+            
         }
 
         [STAThread]
